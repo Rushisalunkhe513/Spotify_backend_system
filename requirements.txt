@@ -1,0 +1,10 @@
+Flask==3.0.3 # framework for web development
+flask-smorest==0.44.0 # module for applying schema and swagger dockumentation
+Flask-SQLAlchemy==3.1.1 # module for database opertion nd management
+Flask-JWT-Extended==4.6.0 # for jet token creation and security
+Flask-Cors==4.0.0 # module used for directing requests from one web site to other.
+passlib==1.7.4  # module for hashing passwords
+marshmallow==3.21.1 # module for data validation and schema application.
+redis==5.0.3  # NOSQL Database for cache storing.
+python-dotenv==1.0.1
+Flask-Migrate==4.0.7 # for adjusting or changing database to new adjustments,
