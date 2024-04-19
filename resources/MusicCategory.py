@@ -64,55 +64,9 @@ class MusicCategory(MethodView):
         add_category.add_data()
         
         return add_category
+
     
     
-# now lets add get,put,delete category by id or name.
-@blp.route("/category/<int:id>")
-class Category(MethodView):
-    # lets get catgroy by id
-    @blp.response(200,ShowMusicCategory)
-    def get(self,id):
-        # lets get category by id
-        category = MusicCategories.find_by_id(id)
-        
-        if not category:
-            abort (500 , message = f"category with id {id} can not be found.")
-        
-        return category
-    
-    # now lets update category by put method.
-    @blp.arguments(AddMusicCategory)
-    @blp.response(201,ShowMusicCategory)
-    def put(self,id,category_data):
-        
-        # lets see category with id exixt or not
-        category = MusicCategories.find_by_id(id)
-        
-        if not category:
-            abort (500, message = f"category with id {id} can not be found.")
-        
-        if category_data:
-            category.category_name = category_data["category_name"]  
-            category.category_image = category_data["category_image"]
-         
-         # lets call save_db function to save data
-        category.add_data()
-        
-        return category
-    
-    # now lets write delete method to delete data from table
-    def delete(self,id):
-        # lets find if category exixt or not
-        
-        category = MusicCategories.find_by_id(id)
-        
-        if not category:
-            abort (500, message = f"category with id {id} is not found.")
-        
-        # lets import function to delete category and commit.
-        category.delete_data(id)
-        
-        return {"status":"success","message":"category has been deleted."}
     
     
     
@@ -127,3 +81,40 @@ class MusicCategoryName(MethodView):
             abort (500, message = f"category with id {id} not found.")
         
         return category
+    
+    
+    # now lets update category by put method.
+    @blp.arguments(AddMusicCategory)
+    @blp.response(201,ShowMusicCategory)
+    def put(self,name,category_data):
+        
+        # lets see category with id exixt or not
+        category = MusicCategories.find_category_by_name(name)
+        
+        if not category:
+            abort (500, message = f"category with id {name} can not be found.")
+        
+        if category_data:
+            category.category_name = category_data["category_name"]  
+            category.category_image = category_data["category_image"]
+         
+         # lets call save_db function to save data
+        category.add_data()
+        
+        return category
+    
+    
+    
+    # now lets write delete method to delete data from table
+    def delete(self,name):
+        # lets find if category exixt or not
+        
+        category = MusicCategories.find_category_by_name(name)
+        
+        if not category:
+            abort (500, message = f"category with id {name} is not found.")
+        
+        # lets import function to delete category and commit.
+        category.delete_data(name)
+        
+        return {"status":"success","message":"category has been deleted."}
