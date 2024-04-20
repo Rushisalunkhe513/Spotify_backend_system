@@ -23,9 +23,10 @@ from schema import AddMusicCategory,ShowMusicCategory
 music_categories is name of this bluprint,
 __name__ name of model,
 desription is explaination of work we doing on this blueprint.
+added url prefix fpr music_categories bluprint so,whenever we have to acces this endpoints we have to access them through this /music_categories.
 """
 
-blp = Blueprint("music_categories",__name__,description="Operations on Music Categories")
+blp = Blueprint("music_categories",__name__,description="Operations on Music Categories",url_prefix="/music_categories")
 
 
 # lets give endpoint
@@ -41,7 +42,7 @@ class MusicCategory(MethodView):
         if not categories:
             abort (500, message="categories not found.")
             
-        return categories
+        return [category.json() for category in categories] # this will return us jsonify response of all categories.
     
     # post method to add user to database
     # post method needs arguments and response
@@ -59,65 +60,16 @@ class MusicCategory(MethodView):
             category_name = category_data["category_name"],
             category_image = category_data["category_image"]
         )        
-        
-        # lets get function from Model class to add data and commit.
+            
+            # lets get function from Model class to add data and commit.
         add_category.add_data()
+            
+        return add_category.json() # single category with json data output
         
-        return add_category
-    
-    
-# now lets add get,put,delete category by id or name.
-@blp.route("/category/<int:id>")
-class Category(MethodView):
-    # lets get catgroy by id
-    @blp.response(200,ShowMusicCategory)
-    def get(self,id):
-        # lets get category by id
-        category = MusicCategories.find_by_id(id)
         
-        if not category:
-            abort (500 , message = f"category with id {id} can not be found.")
         
-        return category
-    
-    # now lets update category by put method.
-    @blp.arguments(AddMusicCategory)
-    @blp.response(201,ShowMusicCategory)
-    def put(self,id,category_data):
-        
-        # lets see category with id exixt or not
-        category = MusicCategories.find_by_id(id)
-        
-        if not category:
-            abort (500, message = f"category with id {id} can not be found.")
-        
-        if category_data:
-            category.category_name = category_data["category_name"]  
-            category.category_image = category_data["category_image"]
-         
-         # lets call save_db function to save data
-        category.add_data()
-        
-        return category
-    
-    # now lets write delete method to delete data from table
-    def delete(self,id):
-        # lets find if category exixt or not
-        
-        category = MusicCategories.find_by_id(id)
-        
-        if not category:
-            abort (500, message = f"category with id {id} is not found.")
-        
-        # lets import function to delete category and commit.
-        category.delete_data(id)
-        
-        return {"status":"success","message":"category has been deleted."}
-    
-    
-    
 # lets get categiry by its name
-@blp.route("/category/<string:name>")
+@blp.route("/<string:name>") # to access this endpoint we need to use/music_catgory endoint infront of /<string:name> because we have described url_prefix in blueprint.
 class MusicCategoryName(MethodView):
     @blp.response(200,ShowMusicCategory)
     def get(self,name):
@@ -126,4 +78,40 @@ class MusicCategoryName(MethodView):
         if not category:
             abort (500, message = f"category with id {id} not found.")
         
-        return category
+        return category.json()
+    
+    
+    # now lets update category by put method.
+    @blp.arguments(AddMusicCategory)
+    @blp.response(201,ShowMusicCategory)
+    def put(self,name,category_data):
+        
+        # lets see category with id exixt or not
+        category = MusicCategories.find_category_by_name(name)
+        
+        if not category:
+            abort (500, message = f"category with name {name} can not be found.")
+        
+        if category_data:
+            category.category_name = category_data["category_name"]  
+            category.category_image = category_data["category_image"]
+         
+         # lets call save_db function to save data
+        category.add_data()
+        
+        return category.json()
+    
+    # now lets write delete method to delete data from table
+    @blp.response(204)
+    def delete(self,name):
+        # lets find if category exixt or not
+        
+        category = MusicCategories.find_category_by_name(name)
+        
+        if not category:
+            abort (500, message = f"category with name {name} is not found.")
+        
+        # lets import function to delete category and commit.
+        category.delete_data(name)
+        
+        return {"status":"success","message":"category has been deleted."}
