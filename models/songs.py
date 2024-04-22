@@ -18,7 +18,8 @@ class Songs(db.Model):
     
     category = db.relationship(
         "MusicCategories",
-        back_populates="songs"
+        back_populates="songs",
+        # lazy="joined" this will  load parent and child class together whenver parent class is called.
     )
     
     
@@ -27,5 +28,6 @@ class Songs(db.Model):
         return {
             "id":self.id,
             "song_name":self.song_name,
-            "category_id":self.category_id
+            "category_id":self.category_id,
+            "song_details":[detail.json() for detail in self.song_details] # this will get ong_details data from song.
         }

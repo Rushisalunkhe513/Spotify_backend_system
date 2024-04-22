@@ -14,8 +14,9 @@ class PlainSongSchema(schema):
 # schema for song_details
 class PlainSongDetailsSchema(schema):
     song_id = fields.Int(required = True)
-    release_date = fields.DateTime()
+    release_date = fields.DateTime(error_message="datetime should be in YYYY-MM-DD")
     artist= fields.Str(required=True)
+    lyrics = fields.Str()
     duration = fields.Str()
     
     
@@ -48,6 +49,7 @@ class AddMusicCategory(schema):
     id = fields.Int(dump_only=True) # dump_only= need during output not during input data
     category_name = fields.Str(required=True)
     category_image = fields.Str(required=True)
+    
     
 # schema for get HTTP request.
 class ShowMusicCategory(schema):

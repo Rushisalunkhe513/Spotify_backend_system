@@ -7,10 +7,9 @@ from models import Songs,SongDetails
 
 
 
-blp  = Blueprint("songs",__name__,description="Operation on songs")
+blp  = Blueprint("songs",__name__,description="Operation on songs",url_prefix="/songs")
 
 
 
 
-@blp.route("/songs")
-class ShowSongs
+# user will search for song with name or by category_id
