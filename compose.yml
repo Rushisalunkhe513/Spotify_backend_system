@@ -1,0 +1,49 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    container_name: web_backend_container
+    ports:
+      - "5500:5000"
+    depends_on:
+      - redisDB
+      - postgresDB
+    environment:
+      - db_url="sqlite:///data.db"
+    env_file:
+      - .env
+    networks:
+      - flask_app_spotify
+    restart: always
+
+  redisDB:
+    image: redis-alpine
+    ports:
+      -"6379:6379"
+    healthcheck:
+      test: ["redis", "ping"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    container_name: redis_container
+    networks:
+      - flask_app_spotify
+    restart: always
+
+  postgresDB:
+    image: postgres:latest
+    container_name: postgresDB
+    networks:
+      - flask_app_spotify
+    env_file:
+      - .env
+    environment:
+      - SQL_DB_NAME=SPOTIFYDB
+      - SQL_HOST=localhost
+      - SQL_PASSWORD=Rushi0321
+      - SQL_USERNAME=postgres
+
+networks:
+  flask_app_spotify:
+    driver: bridge

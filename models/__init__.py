@@ -1,0 +1,1 @@
+from models.music_categories import MusicCategories # declaring it in __init__.py so it will easy importing in other place.
