@@ -29,3 +29,4 @@ class SongDetails(db.Model):
             "lyrics":self.lyrics,
             "song_id":self.song_id
         }
+    

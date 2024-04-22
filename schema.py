@@ -14,7 +14,7 @@ class PlainSongSchema(schema):
 # schema for song_details
 class PlainSongDetailsSchema(schema):
     song_id = fields.Int(required = True)
-    release_date = fields.DateTime(error_message="datetime should be in YYYY-MM-DD")
+    release_date = fields.Str(error_message={"message":"datetime should be in DD-MM-YYYY"})
     artist= fields.Str(required=True)
     lyrics = fields.Str()
     duration = fields.Str()
@@ -22,24 +22,34 @@ class PlainSongDetailsSchema(schema):
     
 # add song to database
 class AddSongSchema(PlainSongSchema):
-    song_details = fields.List(fields.Nested(PlainSongDetailsSchema),required=True)
+    song_details = fields.List(fields.Nested(PlainSongDetailsSchema))
+    
+class UpdateSong(schema):
+    song_name = fields.Str()
+    category_id = fields.Int()
+
+class UpdateSongdetails(schema):
+    release_date =fields.Str()
+    lyrics = fields.Str()
+    artist = fields.Str()
+    duration = fields.Str()
+    
+class UpdateSongandSongDetails(UpdateSong):
+    song_details = fields.List(fields.Nested(UpdateSongdetails))
+    
+    
     
 # show songs on board only song name is required.
-class ShowSong(schema):
-    song_name = fields.Str()
-    
-# now show complete song details
-# song_details to show
-
 class SongDetails(schema):
     artist = fields.Str()
     release_date = fields.DateTime()
+    lyrics = fields.Str()
     duration = fields.String()
-
-
-class ShowSongandDetails(schema):
+    
+class ShowSong(schema):
     song_name = fields.Str()
-    song_details = fields.List(fields.Nested(SongDetails))
+    song_details = fields.List(fields.Nested(SongDetails()))
+    
     
 
 # declare schema for music_catgory
@@ -56,7 +66,7 @@ class ShowMusicCategory(schema):
     id = fields.Int()
     category_name = fields.Str()
     category_image = fields.Str()
-    songs = fields.List(fields.Nested(ShowSongandDetails))
+    songs = fields.List(fields.Nested(ShowSong))
     
     
     

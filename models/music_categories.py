@@ -18,6 +18,12 @@ class MusicCategories(db.Model):
     category_name = db.Column(db.String,nullable=False)
     category_image = db.Column(db.String,nullable=False)
     
+    songs = db.relationship(
+        "Songs",
+        back_populates="category",
+        cascade = "all,delete"
+    )
+    
     
     # lets add json serialized function to send data in json format.
     # its actually data we are sending in output format in json so, client can tke data.
