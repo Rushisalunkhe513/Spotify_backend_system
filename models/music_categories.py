@@ -57,9 +57,11 @@ class MusicCategories(db.Model):
     def add_data(self):
         db.session.add(self)
         db.session.commit()
+        db.session.close()
         
     # function to delete data and commit
     def delete_data(self):
         db.session.delete(self)
         db.session.commit()
+        db.session.close()
         

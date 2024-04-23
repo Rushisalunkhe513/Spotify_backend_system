@@ -10,12 +10,13 @@ from marshmallow import schema,fields,validate
 class PlainSongSchema(schema):
     song_name = fields.Str(required=True)
     category_id = fields.Int(required=True)
+    artist_name = fields.Str(required=True)
+    artist_id = fields.Int(required = True)
     
 # schema for song_details
 class PlainSongDetailsSchema(schema):
     song_id = fields.Int(required = True)
     release_date = fields.Str(error_message={"message":"datetime should be in DD-MM-YYYY"})
-    artist= fields.Str(required=True)
     lyrics = fields.Str()
     duration = fields.Str()
     
@@ -27,11 +28,12 @@ class AddSongSchema(PlainSongSchema):
 class UpdateSong(schema):
     song_name = fields.Str()
     category_id = fields.Int()
+    artist_name = fields.Str()
+    artist_id = fields.Int()
 
 class UpdateSongdetails(schema):
     release_date =fields.Str()
     lyrics = fields.Str()
-    artist = fields.Str()
     duration = fields.Str()
     
 class UpdateSongandSongDetails(UpdateSong):
@@ -41,13 +43,13 @@ class UpdateSongandSongDetails(UpdateSong):
     
 # show songs on board only song name is required.
 class SongDetails(schema):
-    artist = fields.Str()
     release_date = fields.DateTime()
     lyrics = fields.Str()
     duration = fields.String()
     
 class ShowSong(schema):
     song_name = fields.Str()
+    artist_name = fields.Str()
     song_details = fields.List(fields.Nested(SongDetails()))
     
     
@@ -73,3 +75,23 @@ class ShowMusicCategory(schema):
     
     
     
+
+# lets add artist_details
+class AddArtistSchema(schema):
+    name = fields.Str(required = True)
+    birth_date = fields.Str()
+    description = fields.Str()
+    
+# schema for u[dating artist details.
+class UpdateArtistDetails(schema):
+    name = fields.Str()
+    birth_date = fields.Str()
+    description = fields.Str() 
+    
+# lets now get artist and artist all songs
+class ArtistandSongs(schema):
+    name = fields.Str()
+    artist_birth_date = fields.Str()
+    description = fields.Str()
+    
+    artist_songs = fields.List(fields.Nested(ShowSong),many=True)

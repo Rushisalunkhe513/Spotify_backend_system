@@ -31,7 +31,7 @@ blp = Blueprint("music_categories",__name__,description="Operations on Music Cat
 
 # lets give endpoint
 
-@blp.route("/categories")
+@blp.route("/")
 class MusicCategory(MethodView):
     # lets write get method with giving output response
     # get method do not need any input
@@ -54,7 +54,7 @@ class MusicCategory(MethodView):
         
         category = MusicCategories.find_category_by_name(category_data["category_name"])
         if category:
-            abort (500, message = "category with same name exixt.")
+            abort(500, message = "category with same name exixt.")
             
         add_category = MusicCategories(
             category_name = category_data["category_name"],
@@ -101,7 +101,7 @@ class MusicCategoryName(MethodView):
         if not category:
             abort (500, message = f"category with name {name} can not be found.")
         
-        if category_data:
+        if category:
             category.category_name = category_data["category_name"]  
             category.category_image = category_data["category_image"]
          

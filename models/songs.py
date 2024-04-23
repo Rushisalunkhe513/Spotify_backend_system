@@ -8,13 +8,22 @@ class Songs(db.Model):
     
     id = db.Column(db.Integer,primary_key=True,autoincrement=True)
     song_name=db.Column(db.String,nullable=False)
+    artist_name = db.Column(db.String,nullable= False,default="N/A")
+    
+    artist_id = db.Column(db.String,db.ForeignKey("artist.id"),nullable=False)
     
     category_id = db.Column(db.Integer,db.ForeignKey("music_categories.id"),nullable=False)
     
     song_details = db.relationship(
         "SongDetails",
         back_populates="song",
-        cascade = "all,delete"
+        cascade = "all,delete",
+        lazy='joined'
+    )
+    
+    artist_details = db.relationship(
+        "ArtistModel",
+        back_populates = "songs"
     )
     
     category = db.relationship(
@@ -45,16 +54,18 @@ class Songs(db.Model):
     
     # lets check if song exist with name and same artist
     @classmethod
-    def check_song(cls,name,artist): # artist is in song_details column so lets check
-        return cls.query.join(SongDetails).filter_by(SongDetails.artist == artist and cls.song_name == name).first() # here we are joining table of relationa table to see artist with same name with song_name exixt.
+    def check_song(cls,name,artist_name): # artist is in song_details column so lets check
+        return cls.query.filter_by(song_name = name,artist_name = artist_name).first() # here we are joining table of relationa table to see artist with same name with song_name exixt.
     
     
     # lets write function to add data to class
     def add_data(self):
         db.session.add(self)
         db.session.commit()
+        db.session.close()
         
     # lets delete data from table
     def delete_data(self):
-        db.session.delete()
+        db.session.delete(self)
         db.session.commit()
+        db.session.close()
