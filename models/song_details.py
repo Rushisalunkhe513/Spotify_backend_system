@@ -8,7 +8,6 @@ class SongDetails(db.Model):
     
     id = db.Column(db.Integer,primary_key=True,autoincrement=True)
     release_date = db.Column(db.DateTime,nullable=False,default=datetime.now())
-    artist = db.Column(db.String,nullable=False,default="N/A")
     duration = db.Column(db.String,nullable=False,default="NA")
     lyrics = db.Column(db.String,nullable=True)
     song_id = db.Column(db.Integer,db.ForeignKey("songs.id"),nullable=False)
@@ -17,6 +16,7 @@ class SongDetails(db.Model):
         "Songs",
         back_populates="song_details"
     )
+
     
     
     # for working with relational table this is how we can get details of both tables.
