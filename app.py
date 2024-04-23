@@ -8,6 +8,7 @@ import os
 from dotenv import load_dotenv
 
 from resources.MusicCategory import blp as MusciCategoryBLP
+from resources.songs import blp as SongsBLP
 
 load_dotenv()
 
@@ -34,3 +35,4 @@ with app.app_context():
 
 # now lets register one part of application catgory
 api.register_blueprint(MusciCategoryBLP) # we have registered MusicCtegory Blurpint in here,by doing this we can acces MusicCategory routes in application.
+api.register_blueprint(SongsBLP)

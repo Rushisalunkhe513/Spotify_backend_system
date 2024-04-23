@@ -66,6 +66,14 @@ class MusicCategory(MethodView):
             
         return add_category.json() # single category with json data output
         
+
+
+    
+    
+    
+    
+    
+
         
         
 # lets get categiry by its name
@@ -79,6 +87,7 @@ class MusicCategoryName(MethodView):
             abort (500, message = f"category with id {id} not found.")
         
         return category.json()
+    
     
     
     # now lets update category by put method.
@@ -100,6 +109,8 @@ class MusicCategoryName(MethodView):
         category.add_data()
         
         return category.json()
+    
+    
     
     # now lets write delete method to delete data from table
     @blp.response(204)
