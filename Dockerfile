@@ -1,17 +1,24 @@
-# base image
+# lets add base image for application.
 FROM python:3.9-slim
-# lets add workdir
+
+# lets create working die inside Docker
 WORKDIR /app
-# now copy requirements.txt
-COPY requirements.txt /app/requirements.txt
-# lets run command to install dependencies.
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
-# lets copy code of host into docker dir
+
+# lets copy requirements.txt in docker dir /app
+COPY requirements.txt  /app/requirements.txt
+
+# lets copy application code in docker /app/
 COPY . /app/
-# lets add env var
+
+# set ENV variable
 ENV PRODUCTION=True
-ENV db_url="sqlite:///dev_db"
-# expose port from docker
+ENV db_url="sqlite:///data.db"
+
+# lets run command to install all dependencies
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
+
+# EXPOSE port for DOCKER Mapping
 EXPOSE 5000
-# lets run commad to run application
+
+# lets write command to run application
 CMD ["flask","run","--host","0.0.0.0"]

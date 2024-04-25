@@ -138,6 +138,7 @@ class SongByName(MethodView):
     
     
     # lets write delete method to delete song with id
+    @blp.response(204)
     def delete(self,name):
         # lets get song by name
         
@@ -146,7 +147,7 @@ class SongByName(MethodView):
         if not song:
             abort (400, message = f"can not find song with name {name}.")
         
-        Songs.delete_data(song)
+        song.delete_data()
         
         return {"status":"success","message":f"deleted the song with name {name}."},201
             

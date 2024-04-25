@@ -4,14 +4,13 @@
 
 from marshmallow import schema,fields,validate
 
-# lets declare schema for songs
-
 # normal schema for song
 class PlainSongSchema(schema):
     song_name = fields.Str(required=True)
     category_id = fields.Int(required=True)
     artist_name = fields.Str(required=True)
     artist_id = fields.Int(required = True)
+    album_id = fields.Int(required=True)
     
 # schema for song_details
 class PlainSongDetailsSchema(schema):
@@ -30,6 +29,7 @@ class UpdateSong(schema):
     category_id = fields.Int()
     artist_name = fields.Str()
     artist_id = fields.Int()
+    album_id = fields.Int()
 
 class UpdateSongdetails(schema):
     release_date =fields.Str()
@@ -52,7 +52,30 @@ class ShowSong(schema):
     artist_name = fields.Str()
     song_details = fields.List(fields.Nested(SongDetails()))
     
+
+# lets declare schema for albums and albums_songs
+class AddAlbum(schema):
+    name = fields.Str(required=True)
+    artist_id = fields.Int(required = True)
     
+class AddedAlbum(schema):
+    id = fields.Int()
+    name = fields.Str()
+    artist_id = fields.Int()
+    
+class UpdateAlbum(schema):
+    name = fields.Str()
+    artist_id = fields.Int()
+    
+class UpdatedAlbum(schema):
+    name = fields.Str()
+    artist_id = fields.Int()
+    album_songs = fields.List(fields.Nested(ShowSong),many=True)
+    
+# lets get albums and album songs
+class ShowAlbum(schema):
+    name = fields.Str()
+    songs = fields.List(fields.Nested(ShowSong))  
 
 # declare schema for music_catgory
 
@@ -95,3 +118,4 @@ class ArtistandSongs(schema):
     description = fields.Str()
     
     artist_songs = fields.List(fields.Nested(ShowSong),many=True)
+    albums = fields.List(fields.Nested(ShowAlbum),many = True)

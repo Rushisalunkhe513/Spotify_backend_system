@@ -14,6 +14,8 @@ class Songs(db.Model):
     
     category_id = db.Column(db.Integer,db.ForeignKey("music_categories.id"),nullable=False)
     
+    album_id = db.Column(db.Integer,db.ForeignKey("albums.id"),nullable = False)
+    
     song_details = db.relationship(
         "SongDetails",
         back_populates="song",
@@ -29,18 +31,24 @@ class Songs(db.Model):
     category = db.relationship(
         "MusicCategories",
         back_populates="songs",
-        # lazy="joined" this will  load parent and child class together whenver parent class is called.
+        
+    )
+    
+    albums = db.relationship(
+        "AlbumModel",
+        back_populates = "songs"
     )
     
     
     # now lets serialize for
     def json(self):
         return {
-            "id":self.id,
-            "song_name":self.song_name,
-            "category_id":self.category_id,
-            "song_details":[detail.json() for detail in self.song_details] # this will get ong_details data from song.
+        "id": self.id,
+        "song_name": self.song_name,
+        "category_id": self.category_id,
+        "song_details": [detail.json() for detail in self.song_details]  # this will get song_details data from song.
         }
+
         
     # find all songs
     @classmethod

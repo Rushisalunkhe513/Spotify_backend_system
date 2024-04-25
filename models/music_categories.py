@@ -21,7 +21,8 @@ class MusicCategories(db.Model):
     songs = db.relationship(
         "Songs",
         back_populates="category",
-        cascade = "all,delete"
+        cascade = "all,delete",
+        lazy = "joined"
     )
     
     

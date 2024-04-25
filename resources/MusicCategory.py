@@ -123,6 +123,6 @@ class MusicCategoryName(MethodView):
             abort (500, message = f"category with name {name} is not found.")
         
         # lets import function to delete category and commit.
-        category.delete_data(name)
+        category.delete_data()
         
         return {"status":"success","message":"category has been deleted."}
