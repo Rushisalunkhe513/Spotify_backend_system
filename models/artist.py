@@ -19,6 +19,13 @@ class ArtistModel(db.Model):
         lazy="joined"
     )
     
+    albums = db.relationship(
+        "AlbumModel",
+        back_populates = "artist",
+        cascade = "all,delete",
+        lazy = "joined"
+    )
+    
     
     # lets modify response
     def json(self):
@@ -26,8 +33,9 @@ class ArtistModel(db.Model):
             "id":self.id,
             "name":self.name,
             "birth_data":self.birth_date,
-            "artist_description":self.artist_description,
-            "songs":[song.json() for song in self.songs]
+            "artist_description":self.description,
+            "songs":[song.json() for song in self.songs],
+            "albums":[album.json() for album in self.albums]
         }
         
     # now lets find artist by name
