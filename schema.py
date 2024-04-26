@@ -119,3 +119,36 @@ class ArtistandSongs(schema):
     
     artist_songs = fields.List(fields.Nested(ShowSong),many=True)
     albums = fields.List(fields.Nested(ShowAlbum),many = True)
+    
+    
+# lets add user schema
+class RegisterUser(schema):
+    name = fields.Str(required=True)
+    email = fields.Str(required=True)
+    mobile_number=fields.Str(required=True)
+    password = fields.Str(required=True)
+    
+    
+# lets reset password
+class UpdatePassword(schema):
+    email = fields.Str(required=True)
+    new_password = fields.Str(required=True)
+    re_enter_password = fields.Str(required=True)
+    
+# lets update user_details
+class UpdateUserDetails(schema):
+    name = fields.Str()
+    email = fields.Str()
+    mobile_number = fields.Str()
+    
+    
+# login user schema
+class LoginUser(schema):
+    email = fields.Str(required=True)
+    password = fields.Str(required=True)
+    
+# lets get all user details
+class ShowUserData(schema):
+    name = fields.Str()
+    email = fields.Str()
+    mobile_number = fields.Str()
