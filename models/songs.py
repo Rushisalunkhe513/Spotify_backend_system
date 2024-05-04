@@ -34,6 +34,13 @@ class Songs(db.Model):
         
     )
     
+    # song to user_playlist
+    playlist_song = db.relationship(
+        "PlaylistSongsModel",
+        back_populates="song",
+        cascade="all,delete"
+    )
+    
     albums = db.relationship(
         "AlbumModel",
         back_populates = "songs"

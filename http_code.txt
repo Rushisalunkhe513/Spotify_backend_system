@@ -1,0 +1,15 @@
+200-299 code for succesful request completion.
+"""
+200 OK: Successful request with content.
+201 Created: Successful request resulting in the creation of a new resource.
+203 Non-Authoritative Information: Successful request, but the returned information may be from a third-party source (rarely used).
+204 No Content: Successful request with no content to return in the response body.
+"""
+
+400-499 code for client based error
+"""
+400: Client error - Bad Request.
+401: Client error - Unauthorized (authentication required).
+403: Client error - Forbidden (authentication provided but access is denied).
+404: Client error - Not Found (requested resource does not exist).
+"""

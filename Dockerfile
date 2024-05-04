@@ -1,24 +1,24 @@
-# lets get base image
+# base image for application
 FROM python:3.9-slim
 
-# lets create workdir
+# now add workdir
 WORKDIR /app
 
-# lets copy requirements.txt inside the /app/requirements.txt
+# now lets copy requirements.txt intp app
 COPY requirements.txt /app/requirements.txt
 
-# now lets copy app code into docker dir
+# now lets COPY application code into workdir
 COPY . /app/
 
-# lets add env var
-ENV PRODUCTION=True
-ENV db_url="sqlite://dev.db"
-
-# lets run commad to install dependencies
+# now RUN and Install dependecies.
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-# lets expose docker port
+# now add env var
+ENV PRODUCTION=True
+ENV db_url="sqlite:///dev.db"
+
+# noe expose docker port
 EXPOSE 5000
 
-# write command to run application
+# command to run pplication
 CMD ["flask","run","--host","0.0.0.0"]

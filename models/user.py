@@ -12,6 +12,13 @@ class UserModel(db.Model):
     email = db.Column(db.String,nullable=False,default="N/A")
     mobile_number = db.Column(db.String,nullable=False,default="N/A")
     
+    user_playlists = db.relationship(
+        "UserPlaylistModel",
+        back_populates = "user",
+        lazy = "joined",
+        cascade = "all,delete"
+    )
+    
     
     
     def json(self):
@@ -19,7 +26,8 @@ class UserModel(db.Model):
             "id":self.id,
             "name":self.name,
             "mobile_number":self.mobile_number,
-            "email":self.email
+            "email":self.email,
+            "user_playlists":[user_playlist.json() for user_playlist in self.user_playlists]
         }
         
     # lets get all user

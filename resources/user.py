@@ -14,10 +14,24 @@ from passlib.hash import pbkdf2_sha256
 blp = Blueprint("users",__name__,description="Operation on users",url_prefix="/users")
 
 
+# lets add security by genrating access token and refersh token during user registration and user login. 
+# also we need to delete thos access and refresh tokens to blocklist.
+# lets use flsk_jwt_extended
+
+from flask_jwt_extended import (
+    create_access_token, # creates access token
+    create_refresh_token, # creates refresh token
+    jwt_required, # ask for jwt token everytime when accessing endpoint.
+    get_jwt, # 
+    get_jwt_identity # 
+)
+
 # lets add route for getting all users
 @blp.route("/")
 class Users(MethodView):
     # lets get response
+    # user should not be accessible to everyine only to admin.
+    @jwt_required() # ask for jwt_token everytime when asking for all users from database.
     @blp.response(200,ShowUserData)
     def get(self):
         # get all users
@@ -30,7 +44,7 @@ class Users(MethodView):
         return [user.json() for user in users]
     
 # lets write new endoint to register user
-@blp.route("/register_user")
+@blp.route("/register")
 class RegisterUser(MethodView):
     # lets add new user to database by post method.
     @blp.response(201,ShowUserData)
@@ -52,6 +66,12 @@ class RegisterUser(MethodView):
             password = pbkdf2_sha256.hash(user_data["password"])
         )
         
+        """
+        When user is added to the database user will automatically logged in to website. 
+        so,we need to genrate jwt token and return that tokens to client.
+        """
+        access_token = create_access_token()
+        
         # now lets add new user data to database.
         user.save_data()
         
@@ -60,7 +80,7 @@ class RegisterUser(MethodView):
     
     
 # now lets write endpoint to do login
-@blp.route("/login_user")
+@blp.route("/login")
 class LoginUser(MethodView):
     # lets login user by name(username) and password(by decrypting it passlib library.)
     @blp.arguments(LoginUser)
