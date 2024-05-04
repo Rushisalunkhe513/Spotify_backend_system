@@ -119,3 +119,90 @@ class ArtistandSongs(schema):
     
     artist_songs = fields.List(fields.Nested(ShowSong),many=True)
     albums = fields.List(fields.Nested(ShowAlbum),many = True)
+    
+    
+# lets add user schema
+class RegisterUser(schema):
+    name = fields.Str(required=True)
+    email = fields.Str(required=True)
+    mobile_number=fields.Str(required=True)
+    password = fields.Str(required=True)
+    
+    
+# lets reset password
+class UpdatePassword(schema):
+    email = fields.Str(required=True)
+    new_password = fields.Str(required=True)
+    re_enter_password = fields.Str(required=True)
+    
+# lets update user_details
+class UpdateUserDetails(schema):
+    name = fields.Str()
+    email = fields.Str()
+    mobile_number = fields.Str()
+    
+    
+# login user schema
+class LoginUser(schema):
+    email = fields.Str(required=True)
+    password = fields.Str(required=True)
+    
+# now lets when we ask for user we should get user_playlist and playlist_songs.
+
+# we will be needing all songs from playlist
+class SongToPlaylist(schema):
+    song_id = fields.Int(required=True)
+    song_name = fields.Str(required=True)
+    
+class AddPlaylistSongs(schema):
+    songs = fields.List(fields.Nested(SongToPlaylist),required = True)
+    playlist_id = fields.Int(required=True)
+
+class ShowSongs(schema):
+    song_name = fields.Str()
+ 
+class ShowPlaylistSongs(schema):
+    song_list = fields.List(fields.Nested(ShowSongs))
+    
+class AddUserPlaylist(schema):
+    name = fields.Str(required=True)
+    user_id = fields.Int(required=True)
+    
+class UpdatePlaylist(schema):
+    name = fields.Str()
+    user_id = fields.Int()
+    
+class ShowUserPlaylists(schema):
+    name = fields.Str()
+    playlists_songs = fields.List(fields.Nested(ShowPlaylistSongs))
+    
+    
+# lets get all user details including user_playlist and playlist songs.
+class ShowUserData(schema):
+    name = fields.Str()
+    email = fields.Str()
+    mobile_number = fields.Str()
+    playlists = fields.List(fields.Nested(ShowUserPlaylists))
+    
+    
+    
+    
+# schema for updating admin details
+class UpdateAdminDetails(schema):
+    name = fields.Str()
+    new_password = fields.Str()
+    mobile_number = fields.Str()
+    
+class ShowAdminDetails(schema):
+    name = fields.Str()
+    mobile_number = fields.Str()
+    
+class AdminLogin(schema):
+    name = fields.Str(required = True)
+    password = fields.Str(required = True)
+    
+class UpdateAdminPassword(schema):
+    name = fields.Str(required=True)
+    new_password = fields.Str(required=True)
+    verify_password = fields.Str(required=True)
+    
