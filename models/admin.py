@@ -21,3 +21,20 @@ class AdminModel(db.Model):
             "name":self.name,
             "mobile_number":self.mobile_number
         }
+        
+    # lets write methods to get user by id.
+    @classmethod
+    def get_admin_data_by_name(cls,name):
+        return cls.query.filter_by(name = name).first()
+    
+    # methid for adding data to database.
+    def add_data(self):
+        db.session.add(self)
+        db.session.commit()
+        db.session.close()
+        
+    # methid for deleting data from database.
+    def delete_data(self):
+        db.session.delete(self)
+        db.session.commit()
+        db.session.close()
