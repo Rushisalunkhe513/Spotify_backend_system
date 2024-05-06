@@ -40,6 +40,11 @@ class UserModel(db.Model):
     def find_user_by_email(cls,email):
         return cls.query.filter_by(email = email).first()
     
+    # lets find user by its mobile number
+    @classmethod
+    def get_user_by_mobile_number(cls,mobile_number):
+        return cls.query.filter_by(mobile_number = mobile_number).first()
+    
     # now add data to database
     def save_data(self):
         db.session.add(self)

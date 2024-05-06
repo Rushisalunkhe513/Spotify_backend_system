@@ -18,6 +18,8 @@ from sqlalchemy.exc import SQLAlchemyError
 # we need schema as well
 from schema import AddMusicCategory,ShowMusicCategory
 
+from flask_jwt_extended import jwt_required,get_jwt
+
 
 """
 music_categories is name of this bluprint,
@@ -46,9 +48,17 @@ class MusicCategory(MethodView):
     
     # post method to add user to database
     # post method needs arguments and response
+    @jwt_required(fresh=True)
     @blp.arguments(AddMusicCategory)
     @blp.response(201,ShowMusicCategory)
     def post(self,category_data):
+        # lets get jwt_token payload
+        jwt_data = get_jwt()
+        
+        # lets see token is access token and role is admin
+        if jwt_data["token_type"] !="access" or jwt_data["role"] != "admin":
+            abort(400,message="refresh token can not be used.")
+        
         # lets add data to the catageory table
         # lets check if category with same name exixt or not
         
@@ -68,14 +78,6 @@ class MusicCategory(MethodView):
         
 
 
-    
-    
-    
-    
-    
-
-        
-        
 # lets get categiry by its name
 @blp.route("/<string:name>") # to access this endpoint we need to use/music_catgory endoint infront of /<string:name> because we have described url_prefix in blueprint.
 class MusicCategoryName(MethodView):
@@ -91,9 +93,17 @@ class MusicCategoryName(MethodView):
     
     
     # now lets update category by put method.
+    @jwt_required(fresh=True)
     @blp.arguments(AddMusicCategory)
     @blp.response(201,ShowMusicCategory)
     def put(self,name,category_data):
+        # lets get jwt_token payload
+        jwt_data = get_jwt()
+        
+        # lets see token is access token and role is admin
+        if jwt_data["token_type"] !="access" or jwt_data["role"] != "admin":
+            abort(400,message="refresh token can not be used.")
+        
         
         # lets see category with id exixt or not
         category = MusicCategories.find_category_by_name(name)
@@ -113,8 +123,16 @@ class MusicCategoryName(MethodView):
     
     
     # now lets write delete method to delete data from table
+    @jwt_required(fresh=True)
     @blp.response(204)
     def delete(self,name):
+        # lets get jwt_token payload
+        jwt_data = get_jwt()
+        
+        # lets see token is access token and role is admin
+        if jwt_data["token_type"] !="access" or jwt_data["role"] != "admin":
+            abort(400,message="refresh token can not be used.")
+        
         # lets find if category exixt or not
         
         category = MusicCategories.find_category_by_name(name)

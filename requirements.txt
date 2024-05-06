@@ -8,3 +8,4 @@ marshmallow==3.21.1 # module for data validation and schema application.
 redis==5.0.3  # NOSQL Database for cache storing.
 python-dotenv==1.0.1
 Flask-Migrate==4.0.7 # for adjusting or changing database to new adjustments,
+psycopg==3.1.18 # it is postgresql adapter.
