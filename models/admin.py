@@ -26,6 +26,11 @@ class AdminModel(db.Model):
     @classmethod
     def get_admin_data_by_name(cls,name):
         return cls.query.filter_by(name = name).first()
+
+    # lets get admin data by mobile_number
+    @classmethod
+    def get_admin_by_mobile_number(cls,mobile_number):
+        return cls.query.filter_by(mobile_number = mobile_number).first()
     
     # methid for adding data to database.
     def add_data(self):

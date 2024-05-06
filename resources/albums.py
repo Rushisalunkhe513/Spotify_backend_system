@@ -6,6 +6,8 @@ from models.album import AlbumModel
 
 from schema import AddAlbum,ShowAlbum,AddedAlbum,UpdateAlbum,UpdatedAlbum
 
+from flask_jwt_extended import jwt_required,get_jwt
+
 blp = Blueprint("albums",__name__,description = "Operation on albums",url_prefix = "/albums")
 
 
@@ -13,8 +15,16 @@ blp = Blueprint("albums",__name__,description = "Operation on albums",url_prefix
 @blp.route("/")
 class Albums(MethodView):
     # lets write HTTP get method to get all albums.
+    @jwt_required(fresh=True)
     @blp.response(200,ShowAlbum)
     def get(self):
+        # lets get jwt_token payload
+        jwt_data = get_jwt()
+        
+        # lets see token is access token and role is admin
+        if jwt_data["token_type"] !="access" or jwt_data["role"] != "admin":
+            abort(400,message="refresh token can not be used.")
+        
         # lets get all albums
         albums = AlbumModel.find_all()
         
@@ -24,9 +34,17 @@ class Albums(MethodView):
         return [album.json() for album  in albums]
     
     # lets write post method to add new album
+    @jwt_required(fresh=True)
     @blp.arguments(AddAlbum)
     @blp.response(201,AddedAlbum)
     def post(self,album_data):
+        # lets get jwt_token payload
+        jwt_data = get_jwt()
+        
+        # lets see token is access token and role is admin
+        if jwt_data["token_type"] !="access" or jwt_data["role"] != "admin":
+            abort(400,message="refresh token can not be used.")
+            
         # lets check album to same artist is already in database or not.
         
         album = AlbumModel.check_album_artist(album_data["name"],album_data["artist_id"])
@@ -80,9 +98,17 @@ class AlbumName(MethodView):
         return album_name.json()
     
     # lets update the album by put method
+    @jwt_required(fresh=True)
     @blp.arguments(UpdateAlbum)
     @blp.response(201,UpdatedAlbum)
     def put(self,name,album_data):
+        # lets get jwt_token payload
+        jwt_data = get_jwt()
+        
+        # lets see token is access token and role is admin
+        if jwt_data["token_type"] !="access" or jwt_data["role"] != "admin":
+            abort(400,message="refresh token can not be used.")
+            
         # lets check album with name exist.
         album = AlbumModel.find_albums_by_name(name)
         
@@ -103,8 +129,16 @@ class AlbumName(MethodView):
     
     
     # lets write delete method.
+    @jwt_required(fresh=True)
     @blp.response(204)
     def delete(self,name):
+        # lets get jwt_token payload
+        jwt_data = get_jwt()
+        
+        # lets see token is access token and role is admin
+        if jwt_data["token_type"] !="access" or jwt_data["role"] != "admin":
+            abort(400,message="refresh token can not be used.")
+        
         # lets get album with same name.
         album = AlbumModel.find_albums_by_name(name)
         

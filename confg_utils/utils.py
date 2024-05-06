@@ -10,5 +10,3 @@ def genrate_jwt_secret_key(no_bits):
     jwt_secret_key = secrets.token_hex(no_bits)
     
     return jwt_secret_key
-
-

@@ -12,6 +12,8 @@ from datetime import datetime
 
 from flask import request
 
+from flask_jwt_extended import jwt_required,get_jwt
+
 
 
 blp  = Blueprint("songs",__name__,description="Operation on songs",url_prefix="/songs")
@@ -35,9 +37,17 @@ class GetAllSongs(MethodView):
         return [song.json() for song in songs] # json formated data
     
     # lets add song and song details
+    @jwt_required(fresh=True)
     @blp.arguments(AddSongSchema)
     @blp.response(201,ShowSong)
     def post(self,song_data):
+        # lets get jwt_token payload
+        jwt_data = get_jwt()
+        
+        # lets see token is access token and role is admin
+        if jwt_data["token_type"] !="access" or jwt_data["role"] != "admin":
+            abort(400,message="refresh token can not be used.")
+        
         # lets add song,
         
         check_song = Songs.check_song(song_data["song_name"],song_data["artist_name"])
@@ -73,19 +83,19 @@ class GetAllSongs(MethodView):
         
         return song.json()
     
-# # now lets write search endpoint to get all songs with possible like name
-# @blp.route("/search")
-# class SearchSong(MethodView):
-#     # get method with ShowSong Schema
-#     @blp.response(200,ShowSong)
-#     def get(self):
-#         # lets write query to get song by name.
+# now lets write search endpoint to get all songs with possible like name
+@blp.route("/search-songs")
+class SearchSong(MethodView):
+    # get method with ShowSong Schema
+    @blp.response(200,ShowSong)
+    def get(self):
+        # lets write query to get song by name.
         
-#         search_query = request.args.get("search_query") # this will help to get query from site address.
+        search_query = request.args.get("search_query") # this will help to get query from site address.
         
-#         search_songs_by_query = Songs.query.filter(Songs.song_name.ilike(f"%{search_query}%")).all()
+        search_songs_by_query = Songs.query.filter(Songs.song_name.ilike(f"%{search_query}%")).all()
         
-#         return [song.json() for song in search_songs_by_query]
+        return [song.json() for song in search_songs_by_query]
     
     
 
@@ -103,9 +113,17 @@ class SongByName(MethodView):
         return song.json()
     
     #lets write put method to update song and its details
+    @jwt_required(fresh=True)
     @blp.arguments(UpdateSongandSongDetails)
     @blp.response(201,ShowSong)
     def put(self,name,song_data):
+        # lets get jwt_token payload
+        jwt_data = get_jwt()
+        
+        # lets see token is access token and role is admin
+        if jwt_data["token_type"] !="access" or jwt_data["role"] != "admin":
+            abort(400,message="refresh token can not be used.")
+        
         # lets get song by its name.
         song = Songs.find_song_by_name(name)
         
@@ -138,8 +156,16 @@ class SongByName(MethodView):
     
     
     # lets write delete method to delete song with id
+    @jwt_required(fresh=True)
     @blp.response(204)
     def delete(self,name):
+        # lets get jwt_token payload
+        jwt_data = get_jwt()
+        
+        # lets see token is access token and role is admin
+        if jwt_data["token_type"] !="access" or jwt_data["role"] != "admin":
+            abort(400,message="refresh token can not be used.")
+        
         # lets get song by name
         
         song = Songs.find_song_by_name(name)

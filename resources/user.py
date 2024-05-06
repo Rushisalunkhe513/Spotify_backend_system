@@ -9,6 +9,12 @@ from models.user import UserModel
 # lets import hashing mechanism fom passlib
 from passlib.hash import pbkdf2_sha256
 
+from datetime import datetime,timedelta
+
+import os
+
+# lets import blocklist to add logged out token to blocklist
+from blocklist import Blocklist
 
 # lets add Blurprint
 blp = Blueprint("users",__name__,description="Operation on users",url_prefix="/users")
@@ -70,13 +76,22 @@ class RegisterUser(MethodView):
         When user is added to the database user will automatically logged in to website. 
         so,we need to genrate jwt token and return that tokens to client.
         """
-        access_token = create_access_token()
-        
+        """
+        Here expires_delta means expiry time for token.
+        fresh=True means that token is genrated recently.
+        role = "user" means token belongs to user.
+        """
+        access_token = create_access_token(identity=user.mobile_number,role = "user",token_type="access",expires_delta=datetime.now()+timedelta(minutes=os.getenv("jwt_user_access_token_exp")),fresh=True)
+        refresh_token = create_refresh_token(identity=user.mobile_number,role = "user",token_type="refresh",expires_delta=datetime.now()+timedelta(minutes=os.getenv("jwt_user_refresh_token_exp")))
         # now lets add new user data to database.
         user.save_data()
         
         # now lets return user data
-        return user.json()
+        return {
+            "access_token":access_token,
+            "refresh_token":refresh_token,
+            "user_data":user.json()
+        }
     
     
 # now lets write endpoint to do login
@@ -93,13 +108,22 @@ class LoginUser(MethodView):
         
         if not existing_user:
             abort(400,message = "user with email do not exist.")
-            
+        
+        """
+        when user logins he should get access token and refresh token.
+        when we add fresh=True in token crestion it will add some sort of metadata in it which will in time of decoding 
+        will be verified for token is fresh or not by this metadata.
+        """
+        access_token = create_access_token(identity=existing_user.mobile_number,role="user",token_type="access",expires_delta=datetime.now()+timedelta(minutes=os.getenv("jwt_user_access_token_exp")),fresh=True)
+        refresh_token = create_refresh_token(identity=existing_user.mobile_number,role="user",token_type="refresh",expires_delta=datetime.now()+timedelta(minutes=os.getenv("jwt_user_access_token_exp")))
         
         # we need to verify password from database that is encrypted
         if existing_user and pbkdf2_sha256.verify(login_data["password"],existing_user.password):
             return {
                 "status":"success",
-                "message":"succesfully logged in."
+                "message":"succesfully logged in.",
+                "access_token":access_token,
+                "refresh_token":refresh_token
             }
         else:
             abort(
@@ -112,9 +136,17 @@ class LoginUser(MethodView):
 @blp.route("/update_password")
 class UpdateUserPassword(MethodView):
     # lets write HTTP put method to update user password
+    @jwt_required(fresh=True)
     @blp.arguments(UpdatePassword)
     @blp.response(201)
     def put(self,user_password_data):
+        
+        # now lets see token is access token and role for token is user.
+        jwt_data = get_jwt()
+        
+        if jwt_data["token_type"]=="refresh" or jwt_data["role"] !="user":
+            abort(400,message="token provided is not access token.")
+        
         # lets check use exist or not.
         existing_user = UserModel.find_user_by_email(user_password_data["email"])
         
@@ -140,9 +172,16 @@ class UpdateUserPassword(MethodView):
 class UpdateUserDetails(MethodView):
     # lets get response from updating user data
     # lets get arguments from user.
+    @jwt_required(fresh=True) # will check token is fresh or not.
     @blp.response(201,ShowUserData)
     @blp.arguments(UpdateUserDetails)
     def put(self,email,updated_user_data):
+        
+        jwt_data=get_jwt()
+        
+        if jwt_data["token_type"]=="refresh" or jwt_data["role"] !="user":
+            abort(400,message="wrong jwt token given.")
+            
         # lets check if user exist or not
         existing_user = UserModel.find_user_by_email(email)
         
@@ -165,8 +204,13 @@ class UpdateUserDetails(MethodView):
         return existing_user.json()
     
     # lets delete user by email
+    @jwt_required(fresh=True)
     @blp.response(204)
     def delete(self,email):
+        jwt_data = get_jwt()
+        if jwt_data["token_type"]=="refresh" or  jwt_data["role"] !="user":
+            abort(400,message="wrong jwt token given.")
+            
         # lets check user with same email exist.
         existing_user = UserModel.find_user_by_email(email)
         
@@ -179,3 +223,75 @@ class UpdateUserDetails(MethodView):
             "status":"success",
             "message":"user_dt is deleted succesfully."
         }
+        
+
+# lets write logout endpoint for user.
+@blp.route("/logout")
+class UserLogout(MethodView):
+    # server will be nedding user access token when he tries to logout. 
+    # no additonal data
+    @jwt_required(fresh=True)
+    @blp.response(204)
+    def post(self):
+        # lets get jwt_data from the token
+        
+        jwt_data = get_jwt()
+        
+        if jwt_data["token_type"]=="refresh" or jwt_data["role"] !="user":
+            abort(400,message="wrong jwt token given.")
+            
+        # lets check user exist in database.
+        user_exist = UserModel.query.filter(UserModel.mobile_number == jwt_data["identity"]).first() # will check for user exist ot not.
+        
+        if not user_exist:
+            abort(400,message="user do not exist.")
+        
+        
+        # now lets get ["jti"].
+        # jti is unique id uuid which is used to make token unique.
+        # we get this from jwt token payload and add to blocklist.
+        # when user take this token and the same jti is found in blocklist and token then token will be revoked or wrong token error will be given.
+        
+        jti_unique = jwt_data["jti"]
+        
+        # lets add jti to Blocklist
+        Blocklist.add(jti_unique)
+        
+        return  {
+            "status":"success",
+            "message":"user logged out succesfully."
+        }
+        
+
+# lets write /refresh endpoint to genrate new pair of access and refresh tokens.
+@blp.route("/refresh")
+class RefreshUser(MethodView):
+    # lets write post method to genrate new access and refresh tokens.
+    @jwt_required(refresh=True)
+    @blp.response(204)
+    def post(self):
+        # check for user in database.
+        jwt_data = get_jwt()
+        
+        # lets see user exist in database.
+        exist_user = UserModel.get_user_by_mobile_number(jwt_data["identity"])
+        
+        if not exist_user:
+            abort(400,message="user do not exist.")
+        
+         # if user then check provided token is refrresh token and it is ofuser token 
+        if jwt_data["token_type"] != "refresh" or jwt_data["role"] != "user":
+            abort(400,message="wrong token is being used for refresh endpoint.")
+        
+        # then give a access token and refresh token.
+        new_access_token = create_access_token(identity=exist_user.mobile_number,role="user",expires_delta=datetime.now()+timedelta(minutes=os.getenv("jwt_user_access_token_exp")),token_type="access",fresh=True)
+        new_refresh_token = create_refresh_token(identity=exist_user.mobile_number,role="user",token_type="refresh",expires_delta=datetime.now()+timedelta(minutes=os.getenv("jwt_user_refresh_token_exp")))
+        return {
+            "access_token":new_access_token,
+            "refresh_token":new_refresh_token,
+            "status":"success",
+            "message":"new access and refresh token are genrated."
+        }
+            
+        
+            

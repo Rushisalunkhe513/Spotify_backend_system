@@ -9,6 +9,8 @@ from schema import ShowUserPlaylists,AddUserPlaylist,UpdatePlaylist,AddPlaylistS
 
 from db import db
 
+from flask_jwt_extended import jwt_required,get_jwt
+
 # lets add bluprint for user_playlist
 
 blp = Blueprint("user_playlist",__name__,description="Operation on user playlist",url_prefix="/user_playlist")
@@ -19,9 +21,15 @@ blp = Blueprint("user_playlist",__name__,description="Operation on user playlist
 @blp.route("/add_playlist")
 class UserPlaylist(MethodView):
     # lets add playlist
+    @jwt_required(fresh=True)
     @blp.arguments(AddUserPlaylist)
     @blp.response(201,ShowUserPlaylists)
     def post(self,playlist_data):
+        
+        jwt_data = get_jwt()
+        
+        if jwt_data["token_type"]=="refresh" or jwt_data["role"] !="user":
+            abort(400,message="wrong jwt token given.")
         # lets add new playlist
         # but first lets check playlist with same name exist or not.
         # if exist the error
@@ -49,8 +57,14 @@ class UserPlaylist(MethodView):
 @blp.route("/<string:playlist_name>")
 class PlaylistName(MethodView):
     # HTTP get method to get playlist by name
+    @jwt_required(fresh=True)
     @blp.response(200,ShowUserPlaylists)       
     def get(self,playlist_name):
+        jwt_data = get_jwt()
+        
+        if jwt_data["token_type"]=="refresh" or jwt_data["role"] !="user":
+            abort(400,message="wrong jwt token given.")
+            
         # lets get user playlist by name
         user_playlist = UserPlaylistModel.get_playlist_by_name(playlist_name)
         
@@ -62,9 +76,16 @@ class PlaylistName(MethodView):
     
     
     # now lets write HTTP Method to update playlist data.
+    @jwt_required(fresh=True)
     @blp.response(201,ShowUserPlaylists)
     @blp.arguments(UpdatePlaylist)
     def put(self,playlist_name,update_playlist_data):
+        
+        jwt_data = get_jwt()
+        
+        if jwt_data["token_type"]=="refresh" or jwt_data["role"] !="user":
+            abort(400,message="wrong jwt token given.")
+            
         # lets check for playlist exist.
         playlist_exist = UserPlaylistModel.get_playlist_by_name(playlist_name)
         
@@ -89,8 +110,14 @@ class PlaylistName(MethodView):
 
     
     # lets write http method to delete playlist by name
+    @jwt_required(fresh=True)
     @blp.response(204)
     def delete(self,playlist_name):
+        jwt_data = get_jwt()
+        
+        if jwt_data["token_type"]=="refresh" or jwt_data["role"] !="user":
+            abort(400,message="wrong jwt token given.")
+            
         # lets get playlist by name
         existing_playlist = UserPlaylistModel.get_playlist_by_name(playlist_name)
         
@@ -113,8 +140,14 @@ class PlaylistName(MethodView):
 @blp.route("/<int:user_id>")
 class UserPlaylists(MethodView):
     # lets write HTTP method to get all User Playlists
+    @jwt_required(fresh=True)
     @blp.response(200,ShowUserPlaylists)
     def get(self,user_id):
+        
+        jwt_data = get_jwt()
+        
+        if jwt_data["token_type"]=="refresh" or jwt_data["role"] !="user":
+            abort(400,message="wrong jwt token given.")
         # lets get all user playlist by user_id
         user_playlists = UserPlaylistModel.get_all_playlist(user_id)
         
@@ -128,9 +161,16 @@ class UserPlaylists(MethodView):
 # now we need to add songs to playlist
 @blp.route("/add_songs/<string:playlist_name>")
 class AddSongs(MethodView):
+    @jwt_required(fresh=True)
     @blp.response(201, ShowPlaylistSongs)
     @blp.arguments(AddPlaylistSongs)
     def post(self, playlist_name, add_song_data):
+        
+        jwt_data = get_jwt()
+        
+        if jwt_data["token_type"]=="refresh" or jwt_data["role"] !="user":
+            abort(400,message="wrong jwt token given.")
+            
         check_playlist = UserPlaylistModel.get_playlist_by_name(playlist_name)
         
         if not check_playlist:
@@ -160,10 +200,15 @@ class AddSongs(MethodView):
 class RemoveSongPlaylist(MethodView):
     # now lets remove the song from playlist.
     # lets write delete HTTP Method
+    @jwt_required(fresh=True)
     @blp.response(204)
     def delete(self,playlist_id,song_name):
-        # now we will delete songs from playlist
+        jwt_data = get_jwt()
         
+        if jwt_data["token_type"]=="refresh" or jwt_data["role"] !="user":
+            abort(400,message="wrong jwt token given.")
+        
+        # now we will delete songs from playlist
         playlist_song = PlaylistSongsModel.query.filter_by(playlist_id=playlist_id, song_name=song_name).first()
         
         if not playlist_song:

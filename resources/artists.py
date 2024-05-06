@@ -9,6 +9,8 @@ from models.artist import ArtistModel
 
 from datetime import datetime
 
+from flask_jwt_extended import get_jwt,jwt_required
+
 
 # lets create blueprint for artist.
 blp = Blueprint("Artist",__name__,description="Operation on Artists",url_prefix="/artists")
@@ -29,11 +31,19 @@ class Artists(MethodView):
         return [artist.json() for artist in artists]
     
     # now lets add artist to database.
+    @jwt_required(fresh=True)
     @blp.response(201,ArtistandSongs)
     @blp.arguments(AddArtistSchema)
     def post(self,artist_data,name):
-        # lets see first if artist with same name exist
         
+        # lets get jwt_token payload
+        jwt_data = get_jwt()
+        
+        # lets see token is access token and role is admin
+        if jwt_data["token_type"] !="access" or jwt_data["role"] != "admin":
+            abort(400,message="refresh token can not be used.")
+            
+        # lets see first if artist with same name exist
         name = artist_data["name"]
         artist = ArtistModel.find_artist_by_name(name)
         
@@ -67,9 +77,17 @@ class Artist(MethodView):
         return artist_by_id.json()
     
     #lets update rtist_details
+    @jwt_required(fresh=True)
     @blp.arguments(UpdateArtistDetails)
     @blp.response(201,ArtistandSongs)
     def put(self,name,artist_data):
+        # lets get jwt_token payload
+        jwt_data = get_jwt()
+        
+        # lets see token is access token and role is admin
+        if jwt_data["token_type"] !="access" or jwt_data["role"] != "admin":
+            abort(400,message="refresh token can not be used.")
+        
         # lets see if artist with name exist or not.
         artist = ArtistModel.find_artist_by_name(name)
         
@@ -92,7 +110,16 @@ class Artist(MethodView):
     
 
     # HTTP method to delete artist
+    @jwt_required(fresh=True)
+    @blp.response(204)
     def delete(self,name):
+        # lets get jwt_token payload
+        jwt_data = get_jwt()
+        
+        # lets see token is access token and role is admin
+        if jwt_data["token_type"] !="access" or jwt_data["role"] != "admin":
+            abort(400,message="refresh token can not be used.")
+            
         # lets get delete query
         artist = ArtistModel.find_artist_by_name(name)
         
