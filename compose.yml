@@ -1,0 +1,50 @@
+version: '3.9'
+
+services:
+  spotify_backend:
+    built: .
+    ports:
+      - 5500:5000
+    container_name: spotify_backend
+    depends_on:
+      - redisDB
+      - postgresDB
+    restart: always
+    environment:
+      - PRODUCTION=True
+      - db_url=sqlite:///dev.db
+    env_file:
+      - .env
+    networks:
+      - spotify_backend_network
+    
+  postgresDB:
+    image: postgres:latest
+    environment:
+      - SQL_DB_NAME=spotify_DB
+      - SQL_USERNAME=postgres
+      - SQL_HOST=localhost
+      - SQL_PASSWORD=Rushi0321
+    env_file:
+      - .env
+    container_name: postgresDB
+    restart: always
+    networks:
+      - spotify_backend_network
+    
+  redisDB:
+    image: redis:latest
+    container_name: redisDB
+    healthcheck:
+      test: ["redis-cli", "ping"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    networks:
+      - spotify_backend_network
+    restart: always
+
+networks:
+  spotify_backend_network:
+    driver: bridge
